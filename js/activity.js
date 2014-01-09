@@ -20,11 +20,17 @@ define(function (require) {
         var mazeDirections = [];
         var mazeForks = [];
 
-        var directions = {
-            'north': 0,
-            'east': 1,
-            'south': 2,
-            'west': 3
+        var dirOrders = ['north', 'east', 'south', 'west'];
+
+        var directions = {};
+        dirOrders.forEach(function (dir, i) {
+            directions[dir] = i;
+        });
+
+        var controls = {
+            'arrows': [38, 39, 40, 37],
+            'wasd': [87, 68, 83, 65],
+            'ijkl': [73, 76, 75, 74]
         };
 
         var debug = true;
@@ -126,7 +132,7 @@ define(function (require) {
                 mazeWalls[x] = new Array(mazeHeight);
             }
             var maze = new ROT.Map.IceyMaze(mazeWidth, mazeHeight, 1);
-//            var maze = new ROT.Map.EllerMaze(mazeWidth, mazeHeight, 1);
+            //var maze = new ROT.Map.EllerMaze(mazeWidth, mazeHeight, 1);
             maze.create(onCellGenerated);
 
             findDirections();
@@ -177,6 +183,21 @@ define(function (require) {
         };
 
         drawMaze();
+
+        var onKeyDown = function (event) {
+            var currentControl;
+            var currentDirection;
+            for (control in controls) {
+                if (controls[control].indexOf(event.keyCode) != -1) {
+                    currentControl = control;
+                    currentDirection = dirOrders[controls[control].
+                                                 indexOf(event.keyCode)];
+                }
+            }
+            console.log(currentControl + ' ' + currentDirection);
+        };
+
+        document.addEventListener("keydown", onKeyDown);
 
     });
 
