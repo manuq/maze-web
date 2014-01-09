@@ -151,10 +151,14 @@ define(function (require) {
             ctx.fillRect(cellWidth * x, cellHeight * y, cellWidth, cellHeight);
         };
 
-        var drawPoint = function (x, y, color) {
+        var drawPoint = function (x, y, color, size) {
+            if (size === undefined) {
+                size = 0.5;
+            }
+
             var centerX = cellWidth * (x + 0.5);
             var centerY = cellHeight * (y + 0.5);
-            var radius = cellWidth / 4;
+            var radius = size * cellWidth / 2;
 
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
@@ -183,7 +187,7 @@ define(function (require) {
 
             for (control in players) {
                 var player = players[control];
-                drawPoint(player.x, player.y, player.color);
+                drawPoint(player.x, player.y, player.color, 1);
             };
 
         };
