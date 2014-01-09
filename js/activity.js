@@ -1,6 +1,7 @@
 define(function (require) {
     var activity = require("sugar-web/activity/activity");
     var ROT = require("rot");
+    require("rAF");
 
     require(['domReady!'], function (doc) {
         activity.setup();
@@ -15,6 +16,8 @@ define(function (require) {
 
         var cellWidth;
         var cellHeight;
+
+        var dirtyCells = [];
 
         var mazeWalls = [];
         var mazeDirections = [];
@@ -158,7 +161,7 @@ define(function (require) {
 
             var centerX = cellWidth * (x + 0.5);
             var centerY = cellHeight * (y + 0.5);
-            var radius = size * cellWidth / 2;
+            var radius = size * Math.min(cellWidth, cellHeight) / 2;
 
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
@@ -268,11 +271,21 @@ define(function (require) {
             var oldX = player.x;
             var oldY = player.y;
             player.move(currentDirection);
-            drawMazeCell(oldX, oldY);
-            drawMazeCell(player.x, player.y);
+            dirtyCells.push({'x': oldX, 'y': oldY});
+            dirtyCells.push({'x': player.x, 'y': player.y});
         };
 
         document.addEventListener("keydown", onKeyDown);
+
+        var animate = function () {
+            dirtyCells.forEach(function (cell) {
+                drawMazeCell(cell.x, cell.y);
+            });
+            dirtyCells = [];
+
+            requestAnimationFrame(animate);
+        };
+        animate();
 
     });
 

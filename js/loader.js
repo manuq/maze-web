@@ -7,6 +7,9 @@ requirejs.config({
         'rot': {
             exports: 'ROT'
         },
+        'rAF': {
+            exports: 'rAF'
+        },
     }
 });
 
