@@ -200,6 +200,30 @@ define(function (require) {
             this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
         };
 
+        Player.prototype.canGo = function (direction) {
+            var dirs = mazeDirections[this.x][this.y];
+            var i = directions[direction];
+            return dirs[i] == 1;
+        };
+
+        Player.prototype.move = function (direction) {
+            if (!(this.canGo(direction))) {
+                return;
+            }
+            if (direction == 'north') {
+                this.y -= 1;
+            }
+            if (direction == 'east') {
+                this.x += 1;
+            }
+            if (direction == 'south') {
+                this.y += 1;
+            }
+            if (direction == 'west') {
+                this.x -= 1;
+            }
+        };
+
         var onKeyDown = function (event) {
             var currentControl;
             var currentDirection;
@@ -216,8 +240,9 @@ define(function (require) {
 
             if (!(currentControl in players)) {
                 players[currentControl] = new Player();
-                drawMaze();
             }
+            players[currentControl].move(currentDirection);
+            drawMaze();
         };
 
         document.addEventListener("keydown", onKeyDown);
