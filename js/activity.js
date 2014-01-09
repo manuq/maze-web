@@ -42,12 +42,14 @@ define(function (require) {
         window.addEventListener('resize', onWindowResize);
 
         var onCellGenerated = function (x, y, value) {
-            var data = {'x': x, 'y': y, 'value': value};
-            mazeData.push(data);
+            mazeData[x][y] = value;
         };
 
         var generateMaze = function () {
             mazeData = [];
+            for (var x=0; x<mazeWidth; x++) {
+                mazeData[x] = new Array(mazeHeight);
+            }
             var maze = new ROT.Map.IceyMaze(mazeWidth, mazeHeight, 1);
 //            var maze = new ROT.Map.EllerMaze(mazeWidth, mazeHeight, 1);
             maze.create(onCellGenerated);
@@ -64,9 +66,11 @@ define(function (require) {
         };
 
         var drawMaze = function () {
-            mazeData.forEach(function (data) {
-                drawCell(data.x, data.y, data.value);
-            });
+            for (var x=0; x<mazeWidth; x++) {
+                for (var y=0; y<mazeHeight; y++) {
+                    drawCell(x, y, mazeData[x][y]);
+                }
+            }
         };
 
         drawMaze();
