@@ -33,6 +33,8 @@ define(function (require) {
             'ijkl': [73, 76, 75, 74]
         };
 
+        var players = {};
+
         var debug = true;
 
         var mazeCanvas = document.getElementById("maze");
@@ -177,12 +179,22 @@ define(function (require) {
                 }
             }
 
-            drawPoint(1, 1, '#afa');
             drawPoint(mazeWidth-3, mazeHeight-3, '#afa');
+
+            for (control in players) {
+                var player = players[control];
+                drawPoint(player.x, player.y, player.color);
+            };
 
         };
 
         drawMaze();
+
+        var Player = function () {
+            this.x = 1;
+            this.y = 1;
+            this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
+        };
 
         var onKeyDown = function (event) {
             var currentControl;
@@ -194,7 +206,14 @@ define(function (require) {
                                                  indexOf(event.keyCode)];
                 }
             }
-            console.log(currentControl + ' ' + currentDirection);
+            if (currentControl === undefined) {
+                return;
+            }
+
+            if (!(currentControl in players)) {
+                players[currentControl] = new Player();
+                drawMaze();
+            }
         };
 
         document.addEventListener("keydown", onKeyDown);
