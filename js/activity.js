@@ -17,7 +17,15 @@ define(function (require) {
         var cellHeight;
 
         var mazeWalls = [];
+        var mazeDirections = [];
         var mazeForks = [];
+
+        var directions = {
+            'north': 0,
+            'east': 1,
+            'south': 2,
+            'west': 3
+        };
 
         var debug = true;
 
@@ -45,23 +53,53 @@ define(function (require) {
         window.addEventListener('resize', onWindowResize);
 
         var countOptions = function (x, y) {
-            var options = 0;
+            var dirs = mazeDirections[x][y];
+            return dirs.reduce(function (previousValue, currentValue) {
+                return previousValue + currentValue;
+            });
+        };
+
+        var getDirections = function (x, y) {
+            var dirs = [0, 0, 0, 0];
+
             if (mazeWalls[x][y] == 1) {
-                return 0;
+                return dirs;
             }
+
             if (mazeWalls[x-1][y] == 0) {
-                options += 1;
+                dirs[directions.west] = 1;
             }
             if (mazeWalls[x+1][y] == 0) {
-                options += 1;
+                dirs[directions.east] = 1;
             }
             if (mazeWalls[x][y-1] == 0) {
-                options += 1;
+                dirs[directions.north] = 1;
             }
             if (mazeWalls[x][y+1] == 0) {
-                options += 1;
+                dirs[directions.south] = 1;
             }
-            return options;
+
+            return dirs;
+        };
+
+        var findDirections = function () {
+            mazeDirections = [];
+            for (var x=0; x<mazeWidth; x++) {
+                mazeDirections[x] = new Array(mazeHeight);
+            }
+            for (var x=0; x<mazeWidth; x++) {
+                for (var y=0; y<mazeHeight; y++) {
+                    mazeDirections[x][y] = getDirections(x, y);
+                }
+            }
+        };
+
+        var isDeadEnd = function (x, y) {
+            return countOptions(x, y) == 1;
+        };
+
+        var isFork = function (x, y) {
+            return countOptions(x, y) > 2;
         };
 
         var findForks = function () {
@@ -71,7 +109,7 @@ define(function (require) {
             }
             for (var x=0; x<mazeWidth; x++) {
                 for (var y=0; y<mazeHeight; y++) {
-                    if (countOptions(x, y) != 0 && countOptions(x, y) != 2) {
+                    if (isDeadEnd(x, y) || isFork(x, y)) {
                         mazeForks[x][y] = 1;
                     }
                 }
@@ -91,6 +129,7 @@ define(function (require) {
 //            var maze = new ROT.Map.EllerMaze(mazeWidth, mazeHeight, 1);
             maze.create(onCellGenerated);
 
+            findDirections();
             findForks();
         };
         generateMaze();
