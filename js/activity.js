@@ -241,6 +241,11 @@ define(function (require) {
             this.y = 1;
             this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
             this.path = undefined;
+            this.animation = undefined;
+        };
+
+        Player.prototype.isMoving = function () {
+            return (this.animation !== undefined);
         };
 
         Player.prototype.canGo = function (direction) {
@@ -294,6 +299,10 @@ define(function (require) {
         }
 
         Player.prototype.move = function (direction) {
+            if (this.isMoving()) {
+                return
+            }
+
             if (!(this.canGo(direction))) {
                 return;
             }
@@ -304,6 +313,7 @@ define(function (require) {
                 var direction = that.path.shift();
                 if (direction == undefined) {
                     clearInterval(that.animation);
+                    that.animation = undefined;
                 };
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
