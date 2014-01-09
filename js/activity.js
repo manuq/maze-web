@@ -30,6 +30,23 @@ define(function (require) {
             directions[dir] = i;
         });
 
+        var opositeDir = function (direction) {
+            switch(direction) {
+            case 'north':
+                return 'south';
+                break;
+            case 'south':
+                return 'north';
+                break;
+            case 'east':
+                return 'west';
+                break;
+            case 'west':
+                return 'east';
+                break;
+            }
+        }
+
         var controls = {
             'arrows': [38, 39, 40, 37],
             'wasd': [87, 68, 83, 65],
@@ -223,6 +240,7 @@ define(function (require) {
             this.x = 1;
             this.y = 1;
             this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
+            this.path = undefined;
         };
 
         Player.prototype.canGo = function (direction) {
@@ -231,22 +249,83 @@ define(function (require) {
             return dirs[i] == 1;
         };
 
+        Player.prototype.findPath = function (direction) {
+
+            var find = function (x, y, direction, first) {
+
+                if (!(first) && (isDeadEnd(x, y) || isFork(x, y))) {
+                    return [];
+                }
+
+                var nextCell = function (x, y, direction) {
+                    var newX = x;
+                    var newY = y;
+                    var newDir;
+
+                    if (direction == 'north') {
+                        newY -= 1;
+                    }
+                    if (direction == 'east') {
+                        newX += 1;
+                    }
+                    if (direction == 'south') {
+                        newY += 1;
+                    }
+                    if (direction == 'west') {
+                        newX -= 1;
+                    }
+
+                    var dirs = mazeDirections[newX][newY];
+                    var tempDirs = dirs.slice(0);
+                    tempDirs[directions[opositeDir(direction)]] = 0;
+                    newDir = dirOrders[tempDirs.indexOf(1)];
+
+                    return {'x': newX, 'y': newY, 'direction': newDir};
+                };
+
+                var next = nextCell(x, y, direction);
+                var result = find(next.x, next.y, next.direction, false);
+                result.unshift(direction);
+                return result;
+
+            };
+
+            return find(this.x, this.y, direction, true);
+        }
+
         Player.prototype.move = function (direction) {
             if (!(this.canGo(direction))) {
                 return;
             }
-            if (direction == 'north') {
-                this.y -= 1;
+
+            var that = this;
+
+            var next = function () {
+                var direction = that.path.shift();
+                if (direction == undefined) {
+                    clearInterval(that.animation);
+                };
+
+                dirtyCells.push({'x': that.x, 'y': that.y});
+
+                if (direction == 'north') {
+                    that.y -= 1;
+                }
+                if (direction == 'east') {
+                    that.x += 1;
+                }
+                if (direction == 'south') {
+                    that.y += 1;
+                }
+                if (direction == 'west') {
+                    that.x -= 1;
+                }
+
+                dirtyCells.push({'x': that.x, 'y': that.y});
             }
-            if (direction == 'east') {
-                this.x += 1;
-            }
-            if (direction == 'south') {
-                this.y += 1;
-            }
-            if (direction == 'west') {
-                this.x -= 1;
-            }
+
+            this.path = this.findPath(direction);
+            this.animation = setInterval(next, 40);
         };
 
         var onKeyDown = function (event) {
@@ -268,11 +347,7 @@ define(function (require) {
             }
 
             var player = players[currentControl];
-            var oldX = player.x;
-            var oldY = player.y;
             player.move(currentDirection);
-            dirtyCells.push({'x': oldX, 'y': oldY});
-            dirtyCells.push({'x': player.x, 'y': player.y});
         };
 
         document.addEventListener("keydown", onKeyDown);
