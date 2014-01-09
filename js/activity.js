@@ -142,7 +142,7 @@ define(function (require) {
         };
         generateMaze();
 
-        var drawCell = function (x, y, value) {
+        var drawGround = function (x, y, value) {
             if (value == 1) {
                 ctx.fillStyle = wallColor;
             } else {
@@ -166,10 +166,32 @@ define(function (require) {
             ctx.fill();
         };
 
+        var drawMazeCell = function (x, y) {
+            drawGround(x, y, mazeWalls[x][y]);
+
+            if (debug) {
+                if (mazeForks[x][y] == 1) {
+                    drawPoint(x, y, '#faa');
+                }
+            }
+
+            if (x == mazeWidth-3 && y == mazeHeight-3) {
+                drawPoint(mazeWidth-3, mazeHeight-3, '#afa');
+            }
+
+            for (control in players) {
+                var player = players[control];
+                if (x == player.x && y == player.y) {
+                    drawPoint(player.x, player.y, player.color, 1);
+                }
+            };
+
+        }
+
         var drawMaze = function () {
             for (var x=0; x<mazeWidth; x++) {
                 for (var y=0; y<mazeHeight; y++) {
-                    drawCell(x, y, mazeWalls[x][y]);
+                    drawGround(x, y, mazeWalls[x][y]);
                 }
             }
 
@@ -241,8 +263,13 @@ define(function (require) {
             if (!(currentControl in players)) {
                 players[currentControl] = new Player();
             }
-            players[currentControl].move(currentDirection);
-            drawMaze();
+
+            var player = players[currentControl];
+            var oldX = player.x;
+            var oldY = player.y;
+            player.move(currentDirection);
+            drawMazeCell(oldX, oldY);
+            drawMazeCell(player.x, player.y);
         };
 
         document.addEventListener("keydown", onKeyDown);
