@@ -151,6 +151,9 @@ define(function (require) {
         runLevel();
 
         var nextLevel = function () {
+            for (control in players) {
+                players[control].stop();
+            }
             gameSize *= 1.2;
             runLevel();
         }
@@ -227,6 +230,11 @@ define(function (require) {
             return find(this.x, this.y, direction, true);
         }
 
+        Player.prototype.stop = function () {
+            clearInterval(this.animation);
+            this.animation = undefined;
+        }
+
         Player.prototype.move = function (direction) {
             if (this.isMoving()) {
                 return
@@ -241,8 +249,7 @@ define(function (require) {
             var next = function () {
                 var direction = that.path.shift();
                 if (direction == undefined) {
-                    clearInterval(that.animation);
-                    that.animation = undefined;
+                    that.stop();
                 };
 
                 maze.visited[that.x][that.y] = that.visitedColor;
@@ -265,8 +272,6 @@ define(function (require) {
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
                 if (that.x == maze.goalPoint.x && that.y == maze.goalPoint.y) {
-                    clearInterval(that.animation);
-                    that.animation = undefined;
                     nextLevel();
                 }
             }
