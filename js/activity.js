@@ -13,6 +13,7 @@ define(function (require) {
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
+        var transversedColor = "#ccbbaa";
         var goalColor = "#00ffaa";
 
         var cellWidth;
@@ -30,7 +31,7 @@ define(function (require) {
 
         var gameSize = 60;
 
-        var debug = true;
+        var debug = false; //true;
 
         var mazeCanvas = document.getElementById("maze");
         var ctx = mazeCanvas.getContext("2d");
@@ -87,6 +88,10 @@ define(function (require) {
         var drawMazeCell = function (x, y) {
             drawGround(x, y, maze.walls[x][y]);
 
+            if (maze.transversed[x][y] == 1) {
+                drawPoint(x, y, transversedColor);
+            }
+
             if (debug) {
                 if (maze.forks[x][y] == 1) {
                     drawPoint(x, y, '#faa');
@@ -110,12 +115,10 @@ define(function (require) {
             for (var x=0; x<maze.width; x++) {
                 for (var y=0; y<maze.height; y++) {
                     drawGround(x, y, maze.walls[x][y]);
-                }
-            }
-
-            if (debug) {
-                for (var x=0; x<maze.width; x++) {
-                    for (var y=0; y<maze.height; y++) {
+                    if (maze.transversed[x][y] == 1) {
+                        drawPoint(x, y, transversedColor);
+                    }
+                    if (debug) {
                         if (maze.forks[x][y] == 1) {
                             drawPoint(x, y, '#faa');
                         }
@@ -224,6 +227,8 @@ define(function (require) {
                     clearInterval(that.animation);
                     that.animation = undefined;
                 };
+
+                maze.transversed[that.x][that.y] = 1;
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
 

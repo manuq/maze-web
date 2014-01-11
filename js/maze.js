@@ -10,6 +10,7 @@ define(function (require) {
     maze.goal = {};
 
     maze.walls = [];
+    maze.transversed = [];
     maze.directions = [];
     maze.forks = [];
 
@@ -44,10 +45,6 @@ define(function (require) {
     };
 
     var findDirections = function () {
-        maze.directions = [];
-        for (var x=0; x<maze.width; x++) {
-            maze.directions[x] = new Array(maze.height);
-        }
         for (var x=0; x<maze.width; x++) {
             for (var y=0; y<maze.height; y++) {
                 maze.directions[x][y] = getDirections(x, y);
@@ -64,10 +61,6 @@ define(function (require) {
     };
 
     var findForks = function () {
-        maze.forks = [];
-        for (var x=0; x<maze.width; x++) {
-            maze.forks[x] = new Array(maze.height);
-        }
         for (var x=0; x<maze.width; x++) {
             for (var y=0; y<maze.height; y++) {
                 if (maze.isDeadEnd(x, y) || maze.isFork(x, y)) {
@@ -81,7 +74,16 @@ define(function (require) {
         maze.walls[x][y] = value;
     };
 
-    maze.generate = function (aspectRatio, size) {
+    var createMatrix = function (width, height) {
+        var matrix = [];
+        for (var x=0; x<width; x++) {
+            matrix[x] = new Array(height);
+        }
+
+        return matrix;
+    };
+
+    var initialize = function (aspectRatio, size) {
         maze.height = Math.sqrt(size / aspectRatio);
         maze.width = maze.height * aspectRatio;
         maze.height = Math.floor(maze.height);
@@ -101,10 +103,16 @@ define(function (require) {
         }
         maze.goal = {'x': goalX, 'y': goalY};
 
-        maze.walls = [];
-        for (var x=0; x<maze.width; x++) {
-            maze.walls[x] = new Array(maze.height);
-        }
+    };
+
+    maze.generate = function (aspectRatio, size) {
+        initialize(aspectRatio, size);
+
+        maze.walls = createMatrix(maze.width, maze.height);
+        maze.transversed = createMatrix(maze.width, maze.height);
+        maze.directions = createMatrix(maze.width, maze.height);
+        maze.forks = createMatrix(maze.width, maze.height);
+
         var rotmaze = new ROT.Map.IceyMaze(maze.width, maze.height, 1);
         //var rotmaze = new ROT.Map.EllerMaze(maze.width, maze.height, 1);
         rotmaze.create(onCellGenerated);
