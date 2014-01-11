@@ -5,9 +5,9 @@ define(function (require) {
 
     var maze = {};
 
-    maze.width = 30;
-    maze.height = 20;
-    maze.goal = {'x': maze.width-3, 'y': maze.height-3};
+    maze.width = undefined;
+    maze.height = undefined;
+    maze.goal = {};
 
     maze.walls = [];
     maze.directions = [];
@@ -81,7 +81,26 @@ define(function (require) {
         maze.walls[x][y] = value;
     };
 
-    maze.generate = function () {
+    maze.generate = function (aspectRatio, size) {
+        maze.height = Math.sqrt(size / aspectRatio);
+        maze.width = maze.height * aspectRatio;
+        maze.height = Math.floor(maze.height);
+        maze.width = Math.floor(maze.width);
+
+        var goalX;
+        var goalY;
+        if (maze.width % 2) {
+            goalX = maze.width-2;
+        } else {
+            goalX = maze.width-3;
+        }
+        if (maze.height % 2) {
+            goalY = maze.height-2;
+        } else {
+            goalY = maze.height-3;
+        }
+        maze.goal = {'x': goalX, 'y': goalY};
+
         maze.walls = [];
         for (var x=0; x<maze.width; x++) {
             maze.walls[x] = new Array(maze.height);

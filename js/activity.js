@@ -44,7 +44,6 @@ define(function (require) {
             mazeCanvas.width = canvasWidth;
             mazeCanvas.height = canvasHeight;
         };
-        updateMazeSize();
 
         var onWindowResize = function () {
             updateMazeSize();
@@ -52,7 +51,8 @@ define(function (require) {
         };
         window.addEventListener('resize', onWindowResize);
 
-        maze.generate();
+        maze.generate(window.innerWidth / window.innerHeight, 600);
+        updateMazeSize();
 
         var drawGround = function (x, y, value) {
             if (value == 1) {
@@ -87,8 +87,8 @@ define(function (require) {
                 }
             }
 
-            if (x == maze.width-3 && y == maze.height-3) {
-                drawPoint(maze.width-3, maze.height-3, '#afa');
+            if (x == maze.goal.x && y == maze.goal.y) {
+                drawPoint(maze.goal.x, maze.goal.y, '#afa');
             }
 
             for (control in players) {
