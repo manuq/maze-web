@@ -31,8 +31,12 @@ define(function (require) {
         var controlColors = {};
 
         var players = {};
+        var winner;
 
         var gameSize = 60;
+
+        var onLevelTransition = false;
+        var levelTransitionRadius;
 
         var debug = false; //true;
 
@@ -143,21 +147,54 @@ define(function (require) {
 
         };
 
+        var drawLevelComplete = function () {
+            var centerX = cellWidth * (winner.x + 0.5);
+            var centerY = cellHeight * (winner.y + 0.5);
+            var radius = levelTransitionRadius;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = winner.color;
+            ctx.fill();
+        }
+
         var runLevel = function () {
             maze.generate(window.innerWidth / window.innerHeight, gameSize);
             updateMazeSize();
             players = {};
+            winner = undefined;
             drawMaze();
         }
         runLevel();
 
-        var nextLevel = function () {
+        var onLevelComplete = function (player) {
+            winner = player;
+            onLevelTransition = true;
+
             var audio = new Audio('sounds/win.wav');
             audio.play();
 
             for (control in players) {
                 players[control].stop();
             }
+
+            var hypot = Math.sqrt(Math.pow(window.innerWidth, 2) +
+                                  Math.pow(window.innerHeight, 2));
+
+            tween = new TWEEN.Tween({radius: 0});
+            tween.to({radius: hypot}, 1200);
+            tween.easing(TWEEN.Easing.Circular.Out);
+            tween.onUpdate(function () {
+                levelTransitionRadius = this.radius;
+            });
+            tween.onComplete(function () {
+                onLevelTransition = false;
+                nextLevel();
+            });
+            tween.start();
+        }
+
+        var nextLevel = function () {
             gameSize *= 1.2;
             runLevel();
         }
@@ -313,7 +350,7 @@ define(function (require) {
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
                 if (that.x == maze.goalPoint.x && that.y == maze.goalPoint.y) {
-                    nextLevel();
+                    onLevelComplete(that);
                 }
             }
 
@@ -322,6 +359,10 @@ define(function (require) {
         };
 
         var onKeyDown = function (event) {
+            if (onLevelTransition) {
+                return;
+            }
+
             var currentControl;
             var currentDirection;
             for (control in controls) {
@@ -358,18 +399,27 @@ define(function (require) {
             }
         };
 
+        var animateGoal = function (timestamp) {
+            var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
+            var light = Math.floor(50 + (10 * (1 + Math.cos(timestamp / 300))));
+            goalColor = 'hsl(' + hue + ', 90%, ' + light + '%)';
+
+            dirtyCells.push({'x': maze.goalPoint.x, 'y': maze.goalPoint.y});
+        }
+
         var animate = function (timestamp) {
             TWEEN.update(timestamp);
 
-            var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
-            var light = Math.floor(50 + (15 * (1 + Math.cos(timestamp / 300))));
-            goalColor = 'hsl(' + hue + ', 90%, ' + light + '%)';
-            dirtyCells.push({'x': maze.goalPoint.x, 'y': maze.goalPoint.y});
+            if (onLevelTransition) {
+                drawLevelComplete();
+            } else {
+                animateGoal(timestamp);
 
-            dirtyCells.forEach(function (cell) {
-                drawMazeCell(cell.x, cell.y);
-            });
-            dirtyCells = [];
+                dirtyCells.forEach(function (cell) {
+                    drawMazeCell(cell.x, cell.y);
+                });
+                dirtyCells = [];
+            }
 
             requestAnimationFrame(animate);
         };
