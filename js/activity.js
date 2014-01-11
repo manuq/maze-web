@@ -13,6 +13,7 @@ define(function (require) {
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
+        var goalColor = "#00ffaa";
 
         var cellWidth;
         var cellHeight;
@@ -54,13 +55,19 @@ define(function (require) {
         maze.generate(window.innerWidth / window.innerHeight, 600);
         updateMazeSize();
 
-        var drawGround = function (x, y, value) {
-            if (value == 1) {
-                ctx.fillStyle = wallColor;
-            } else {
-                ctx.fillStyle = corridorColor;
-            }
+        var drawCell = function (x, y, color) {
+            ctx.fillStyle = color;
             ctx.fillRect(cellWidth * x, cellHeight * y, cellWidth, cellHeight);
+        }
+
+        var drawGround = function (x, y, value) {
+            var color;
+            if (value == 1) {
+                color = wallColor;
+            } else {
+                color = corridorColor;
+            }
+            drawCell(x, y, color);
         };
 
         var drawPoint = function (x, y, color, size) {
@@ -88,7 +95,7 @@ define(function (require) {
             }
 
             if (x == maze.goal.x && y == maze.goal.y) {
-                drawPoint(maze.goal.x, maze.goal.y, '#afa');
+                drawCell(maze.goal.x, maze.goal.y, goalColor);
             }
 
             for (control in players) {
@@ -117,7 +124,7 @@ define(function (require) {
                 }
             }
 
-            drawPoint(maze.goal.x, maze.goal.y, '#afa');
+            drawCell(maze.goal.x, maze.goal.y, goalColor);
 
             for (control in players) {
                 var player = players[control];
