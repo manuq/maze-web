@@ -151,6 +151,9 @@ define(function (require) {
         runLevel();
 
         var nextLevel = function () {
+            var audio = new Audio('sounds/win.wav');
+            audio.play();
+
             for (control in players) {
                 players[control].stop();
             }
@@ -235,12 +238,18 @@ define(function (require) {
             this.animation = undefined;
         }
 
+        Player.prototype.showBlocked = function () {
+            var audio = new Audio('sounds/tick.wav');
+            audio.play();
+        }
+
         Player.prototype.move = function (direction) {
             if (this.isMoving()) {
                 return
             }
 
             if (!(this.canGo(direction))) {
+                this.showBlocked();
                 return;
             }
 
