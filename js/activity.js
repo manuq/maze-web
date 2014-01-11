@@ -28,6 +28,8 @@ define(function (require) {
 
         var players = {};
 
+        var gameSize = 60;
+
         var debug = true;
 
         var mazeCanvas = document.getElementById("maze");
@@ -51,9 +53,6 @@ define(function (require) {
             drawMaze();
         };
         window.addEventListener('resize', onWindowResize);
-
-        maze.generate(window.innerWidth / window.innerHeight, 600);
-        updateMazeSize();
 
         var drawCell = function (x, y, color) {
             ctx.fillStyle = color;
@@ -133,7 +132,18 @@ define(function (require) {
 
         };
 
-        drawMaze();
+        var runLevel = function () {
+            maze.generate(window.innerWidth / window.innerHeight, gameSize);
+            updateMazeSize();
+            players = {};
+            drawMaze();
+        }
+        runLevel();
+
+        var nextLevel = function () {
+            gameSize *= 1.2;
+            runLevel();
+        }
 
         var Player = function () {
             this.x = 1;
@@ -235,7 +245,7 @@ define(function (require) {
                 if (that.x == maze.goal.x && that.y == maze.goal.y) {
                     clearInterval(that.animation);
                     that.animation = undefined;
-                    console.log("you won!");
+                    nextLevel();
                 }
             }
 
