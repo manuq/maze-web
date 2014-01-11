@@ -7,7 +7,8 @@ define(function (require) {
 
     maze.width = undefined;
     maze.height = undefined;
-    maze.goal = {};
+    maze.startPoint = {};
+    maze.goalPoint = {};
 
     maze.walls = [];
     maze.visited = [];
@@ -101,7 +102,8 @@ define(function (require) {
         } else {
             goalY = maze.height-3;
         }
-        maze.goal = {'x': goalX, 'y': goalY};
+        maze.startPoint = {'x': 1, 'y': 1};
+        maze.goalPoint = {'x': goalX, 'y': goalY};
 
     };
 

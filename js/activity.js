@@ -13,7 +13,8 @@ define(function (require) {
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
-        var goalColor = "#00ffaa";
+        var startColor = "hsl(0, 0%, 80%)";
+        var goalColor;
 
         var cellWidth;
         var cellHeight;
@@ -99,8 +100,12 @@ define(function (require) {
                 }
             }
 
-            if (x == maze.goal.x && y == maze.goal.y) {
-                drawCell(maze.goal.x, maze.goal.y, goalColor);
+            if (x == maze.startPoint.x && y == maze.startPoint.y) {
+                drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 1);
+            }
+
+            if (x == maze.goalPoint.x && y == maze.goalPoint.y) {
+                drawCell(maze.goalPoint.x, maze.goalPoint.y, goalColor);
             }
 
             for (control in players) {
@@ -127,7 +132,8 @@ define(function (require) {
                 }
             }
 
-            drawCell(maze.goal.x, maze.goal.y, goalColor);
+            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 1);
+            drawCell(maze.goalPoint.x, maze.goalPoint.y, goalColor);
 
             for (control in players) {
                 var player = players[control];
@@ -150,8 +156,8 @@ define(function (require) {
         }
 
         var Player = function (control) {
-            this.x = 1;
-            this.y = 1;
+            this.x = maze.startPoint.x;
+            this.y = maze.startPoint.y;
             if (!(control in controlColors)) {
                 var hue = Math.floor(Math.random()*360);
                 controlColors[control] = {
@@ -258,7 +264,7 @@ define(function (require) {
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
-                if (that.x == maze.goal.x && that.y == maze.goal.y) {
+                if (that.x == maze.goalPoint.x && that.y == maze.goalPoint.y) {
                     clearInterval(that.animation);
                     that.animation = undefined;
                     nextLevel();
@@ -297,7 +303,7 @@ define(function (require) {
             var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
             var light = Math.floor(50 + (15 * (1 + Math.cos(timestamp / 300))));
             goalColor = 'hsl(' + hue + ', 50%, ' + light + '%)';
-            dirtyCells.push({'x': maze.goal.x, 'y': maze.goal.y});
+            dirtyCells.push({'x': maze.goalPoint.x, 'y': maze.goalPoint.y});
 
             dirtyCells.forEach(function (cell) {
                 drawMazeCell(cell.x, cell.y);
