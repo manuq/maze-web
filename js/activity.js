@@ -102,7 +102,7 @@ define(function (require) {
             }
 
             if (x == maze.startPoint.x && y == maze.startPoint.y) {
-                drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 1);
+                drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
             }
 
             if (x == maze.goalPoint.x && y == maze.goalPoint.y) {
@@ -112,7 +112,7 @@ define(function (require) {
             for (control in players) {
                 var player = players[control];
                 if (x == player.x && y == player.y) {
-                    drawPoint(player.x, player.y, player.color, 1);
+                    drawPoint(player.x, player.y, player.color, 0.9);
                 }
             };
 
@@ -133,12 +133,12 @@ define(function (require) {
                 }
             }
 
-            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 1);
+            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
             drawCell(maze.goalPoint.x, maze.goalPoint.y, goalColor);
 
             for (control in players) {
                 var player = players[control];
-                drawPoint(player.x, player.y, player.color, 1);
+                drawPoint(player.x, player.y, player.color, 0.9);
             };
 
         };
