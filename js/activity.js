@@ -26,6 +26,8 @@ define(function (require) {
             'ijkl': [73, 76, 75, 74]
         };
 
+        var controlColors = {};
+
         var players = {};
 
         var gameSize = 60;
@@ -147,12 +149,18 @@ define(function (require) {
             runLevel();
         }
 
-        var Player = function () {
+        var Player = function (control) {
             this.x = 1;
             this.y = 1;
-            var hue = Math.floor(Math.random()*360);
-            this.color = 'hsl(' + hue + ', 90%, 50%)';
-            this.visitedColor = 'hsl(' + hue + ', 30%, 80%)';
+            if (!(control in controlColors)) {
+                var hue = Math.floor(Math.random()*360);
+                controlColors[control] = {
+                    'color': 'hsl(' + hue + ', 90%, 50%)',
+                    'visitedColor': 'hsl(' + hue + ', 30%, 80%)'
+                }
+            }
+            this.color = controlColors[control].color;
+            this.visitedColor = controlColors[control].visitedColor;
             this.path = undefined;
             this.animation = undefined;
 
@@ -276,7 +284,7 @@ define(function (require) {
             }
 
             if (!(currentControl in players)) {
-                players[currentControl] = new Player();
+                players[currentControl] = new Player(currentControl);
             }
 
             var player = players[currentControl];
