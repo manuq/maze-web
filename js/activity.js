@@ -10,6 +10,7 @@ define(function (require) {
         var canvasHeight;
         var mazeWidth = 30;
         var mazeHeight = 20;
+        var goal = {'x': mazeWidth-3, 'y': mazeHeight-3};
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
@@ -225,7 +226,7 @@ define(function (require) {
                 }
             }
 
-            drawPoint(mazeWidth-3, mazeHeight-3, '#afa');
+            drawPoint(goal.x, goal.y, '#afa');
 
             for (control in players) {
                 var player = players[control];
@@ -332,6 +333,12 @@ define(function (require) {
                 }
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
+
+                if (that.x == goal.x && that.y == goal.y) {
+                    clearInterval(that.animation);
+                    that.animation = undefined;
+                    console.log("you won!");
+                }
             }
 
             this.path = this.findPath(direction);
