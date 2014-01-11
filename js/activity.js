@@ -1,16 +1,15 @@
 define(function (require) {
     var activity = require("sugar-web/activity/activity");
-    var ROT = require("rot");
     require("rAF");
+
+    var maze = require("activity/maze");
+    var directions = require("activity/directions");
 
     require(['domReady!'], function (doc) {
         activity.setup();
 
         var canvasWidth;
         var canvasHeight;
-        var mazeWidth = 30;
-        var mazeHeight = 20;
-        var goal = {'x': mazeWidth-3, 'y': mazeHeight-3};
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
@@ -19,34 +18,6 @@ define(function (require) {
         var cellHeight;
 
         var dirtyCells = [];
-
-        var mazeWalls = [];
-        var mazeDirections = [];
-        var mazeForks = [];
-
-        var dirOrders = ['north', 'east', 'south', 'west'];
-
-        var directions = {};
-        dirOrders.forEach(function (dir, i) {
-            directions[dir] = i;
-        });
-
-        var opositeDir = function (direction) {
-            switch(direction) {
-            case 'north':
-                return 'south';
-                break;
-            case 'south':
-                return 'north';
-                break;
-            case 'east':
-                return 'west';
-                break;
-            case 'west':
-                return 'east';
-                break;
-            }
-        }
 
         var controls = {
             'arrows': [38, 39, 40, 37],
@@ -67,8 +38,8 @@ define(function (require) {
             canvasWidth = window.innerWidth;
             canvasHeight = window.innerHeight - toolbarElem.offsetHeight - 1;
 
-            cellWidth = Math.ceil(canvasWidth / mazeWidth);
-            cellHeight = Math.ceil(canvasHeight / mazeHeight);
+            cellWidth = Math.ceil(canvasWidth / maze.width);
+            cellHeight = Math.ceil(canvasHeight / maze.height);
 
             mazeCanvas.width = canvasWidth;
             mazeCanvas.height = canvasHeight;
@@ -81,87 +52,7 @@ define(function (require) {
         };
         window.addEventListener('resize', onWindowResize);
 
-        var countOptions = function (x, y) {
-            var dirs = mazeDirections[x][y];
-            return dirs.reduce(function (previousValue, currentValue) {
-                return previousValue + currentValue;
-            });
-        };
-
-        var getDirections = function (x, y) {
-            var dirs = [0, 0, 0, 0];
-
-            if (mazeWalls[x][y] == 1) {
-                return dirs;
-            }
-
-            if (mazeWalls[x-1][y] == 0) {
-                dirs[directions.west] = 1;
-            }
-            if (mazeWalls[x+1][y] == 0) {
-                dirs[directions.east] = 1;
-            }
-            if (mazeWalls[x][y-1] == 0) {
-                dirs[directions.north] = 1;
-            }
-            if (mazeWalls[x][y+1] == 0) {
-                dirs[directions.south] = 1;
-            }
-
-            return dirs;
-        };
-
-        var findDirections = function () {
-            mazeDirections = [];
-            for (var x=0; x<mazeWidth; x++) {
-                mazeDirections[x] = new Array(mazeHeight);
-            }
-            for (var x=0; x<mazeWidth; x++) {
-                for (var y=0; y<mazeHeight; y++) {
-                    mazeDirections[x][y] = getDirections(x, y);
-                }
-            }
-        };
-
-        var isDeadEnd = function (x, y) {
-            return countOptions(x, y) == 1;
-        };
-
-        var isFork = function (x, y) {
-            return countOptions(x, y) > 2;
-        };
-
-        var findForks = function () {
-            mazeForks = [];
-            for (var x=0; x<mazeWidth; x++) {
-                mazeForks[x] = new Array(mazeHeight);
-            }
-            for (var x=0; x<mazeWidth; x++) {
-                for (var y=0; y<mazeHeight; y++) {
-                    if (isDeadEnd(x, y) || isFork(x, y)) {
-                        mazeForks[x][y] = 1;
-                    }
-                }
-            }
-        };
-
-        var onCellGenerated = function (x, y, value) {
-            mazeWalls[x][y] = value;
-        };
-
-        var generateMaze = function () {
-            mazeWalls = [];
-            for (var x=0; x<mazeWidth; x++) {
-                mazeWalls[x] = new Array(mazeHeight);
-            }
-            var maze = new ROT.Map.IceyMaze(mazeWidth, mazeHeight, 1);
-            //var maze = new ROT.Map.EllerMaze(mazeWidth, mazeHeight, 1);
-            maze.create(onCellGenerated);
-
-            findDirections();
-            findForks();
-        };
-        generateMaze();
+        maze.generate();
 
         var drawGround = function (x, y, value) {
             if (value == 1) {
@@ -188,16 +79,16 @@ define(function (require) {
         };
 
         var drawMazeCell = function (x, y) {
-            drawGround(x, y, mazeWalls[x][y]);
+            drawGround(x, y, maze.walls[x][y]);
 
             if (debug) {
-                if (mazeForks[x][y] == 1) {
+                if (maze.forks[x][y] == 1) {
                     drawPoint(x, y, '#faa');
                 }
             }
 
-            if (x == mazeWidth-3 && y == mazeHeight-3) {
-                drawPoint(mazeWidth-3, mazeHeight-3, '#afa');
+            if (x == maze.width-3 && y == maze.height-3) {
+                drawPoint(maze.width-3, maze.height-3, '#afa');
             }
 
             for (control in players) {
@@ -210,23 +101,23 @@ define(function (require) {
         }
 
         var drawMaze = function () {
-            for (var x=0; x<mazeWidth; x++) {
-                for (var y=0; y<mazeHeight; y++) {
-                    drawGround(x, y, mazeWalls[x][y]);
+            for (var x=0; x<maze.width; x++) {
+                for (var y=0; y<maze.height; y++) {
+                    drawGround(x, y, maze.walls[x][y]);
                 }
             }
 
             if (debug) {
-                for (var x=0; x<mazeWidth; x++) {
-                    for (var y=0; y<mazeHeight; y++) {
-                        if (mazeForks[x][y] == 1) {
+                for (var x=0; x<maze.width; x++) {
+                    for (var y=0; y<maze.height; y++) {
+                        if (maze.forks[x][y] == 1) {
                             drawPoint(x, y, '#faa');
                         }
                     }
                 }
             }
 
-            drawPoint(goal.x, goal.y, '#afa');
+            drawPoint(maze.goal.x, maze.goal.y, '#afa');
 
             for (control in players) {
                 var player = players[control];
@@ -250,7 +141,7 @@ define(function (require) {
         };
 
         Player.prototype.canGo = function (direction) {
-            var dirs = mazeDirections[this.x][this.y];
+            var dirs = maze.directions[this.x][this.y];
             var i = directions[direction];
             return dirs[i] == 1;
         };
@@ -259,7 +150,7 @@ define(function (require) {
 
             var find = function (x, y, direction, first) {
 
-                if (!(first) && (isDeadEnd(x, y) || isFork(x, y))) {
+                if (!(first) && (maze.isDeadEnd(x, y) || maze.isFork(x, y))) {
                     return [];
                 }
 
@@ -281,10 +172,10 @@ define(function (require) {
                         newX -= 1;
                     }
 
-                    var dirs = mazeDirections[newX][newY];
+                    var dirs = maze.directions[newX][newY];
                     var tempDirs = dirs.slice(0);
-                    tempDirs[directions[opositeDir(direction)]] = 0;
-                    newDir = dirOrders[tempDirs.indexOf(1)];
+                    tempDirs[directions[directions.getOpposite(direction)]] = 0;
+                    newDir = directions.orders[tempDirs.indexOf(1)];
 
                     return {'x': newX, 'y': newY, 'direction': newDir};
                 };
@@ -334,7 +225,7 @@ define(function (require) {
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
-                if (that.x == goal.x && that.y == goal.y) {
+                if (that.x == maze.goal.x && that.y == maze.goal.y) {
                     clearInterval(that.animation);
                     that.animation = undefined;
                     console.log("you won!");
@@ -351,8 +242,8 @@ define(function (require) {
             for (control in controls) {
                 if (controls[control].indexOf(event.keyCode) != -1) {
                     currentControl = control;
-                    currentDirection = dirOrders[controls[control].
-                                                 indexOf(event.keyCode)];
+                    currentDirection = directions.orders[controls[control].
+                                                         indexOf(event.keyCode)];
                 }
             }
             if (currentControl === undefined) {
