@@ -1,5 +1,6 @@
 define(function (require) {
     var activity = require("sugar-web/activity/activity");
+    var TWEEN = require("tween");
     require("rAF");
 
     var maze = require("activity/maze");
@@ -162,6 +163,7 @@ define(function (require) {
         }
 
         var Player = function (control) {
+            this.control = control;
             this.x = maze.startPoint.x;
             this.y = maze.startPoint.y;
             if (!(control in controlColors)) {
@@ -175,6 +177,7 @@ define(function (require) {
             this.visitedColor = controlColors[control].visitedColor;
             this.path = undefined;
             this.animation = undefined;
+            this.blockTween = undefined;
 
             dirtyCells.push({'x': this.x, 'y': this.y});
         };
@@ -239,6 +242,35 @@ define(function (require) {
         }
 
         Player.prototype.showBlocked = function () {
+            var that = this;
+
+            function restoreColor() {
+                that.color = controlColors[that.control].color;
+            }
+
+            if (this.blockTween !== undefined) {
+                this.blockTween.stop();
+                restoreColor();
+            }
+
+            var hsl = getHSL(this.color);
+            var endLight = parseInt(hsl.l.substring(0, hsl.s.length-1));
+            var startLight = endLight + 30;
+
+            this.blockTween = new TWEEN.Tween({l: startLight});
+            this.blockTween.to({l: endLight}, 300);
+
+            this.blockTween.onUpdate(function () {
+                that.color = 'hsl(' + hsl.h + ', ' + hsl.s + ', ' + this.l + '%)';
+                dirtyCells.push({'x': that.x, 'y': that.y});
+            });
+
+            this.blockTween.onComplete(function () {
+                restoreColor();
+            });
+
+            this.blockTween.start();
+
             var audio = new Audio('sounds/tick.wav');
             audio.play();
         }
@@ -313,10 +345,25 @@ define(function (require) {
 
         document.addEventListener("keydown", onKeyDown);
 
+        var CSS_INTEGER = "[-\\+]?\\d+%?";
+        var CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?";
+        var CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")";
+        var MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
+        var hslMatcher = new RegExp("hsl" + MATCH3);
+
+        var getHSL = function (hslColor) {
+           var match = hslMatcher.exec(hslColor);
+            if (match) {
+                return { h: match[1], s: match[2], l: match[3] };
+            }
+        };
+
         var animate = function (timestamp) {
+            TWEEN.update(timestamp);
+
             var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
             var light = Math.floor(50 + (15 * (1 + Math.cos(timestamp / 300))));
-            goalColor = 'hsl(' + hue + ', 50%, ' + light + '%)';
+            goalColor = 'hsl(' + hue + ', 90%, ' + light + '%)';
             dirtyCells.push({'x': maze.goalPoint.x, 'y': maze.goalPoint.y});
 
             dirtyCells.forEach(function (cell) {

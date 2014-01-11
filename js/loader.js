@@ -10,6 +10,9 @@ requirejs.config({
         'rAF': {
             exports: 'rAF'
         },
+        'tween': {
+            exports: 'TWEEN'
+        },
     }
 });
 
