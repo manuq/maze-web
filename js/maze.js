@@ -90,19 +90,31 @@ define(function (require) {
         maze.height = Math.floor(maze.height);
         maze.width = Math.floor(maze.width);
 
-        var goalX;
-        var goalY;
+        var maxCellX;
+        var maxCellY;
         if (maze.width % 2) {
-            goalX = maze.width-2;
+            maxCellX = maze.width-2;
         } else {
-            goalX = maze.width-3;
+            maxCellX = maze.width-3;
         }
         if (maze.height % 2) {
-            goalY = maze.height-2;
+            maxCellY = maze.height-2;
         } else {
-            goalY = maze.height-3;
+            maxCellY = maze.height-3;
         }
-        maze.startPoint = {'x': 1, 'y': 1};
+
+        var startX = Math.random() < 0.5 ? 1 : maxCellX;
+        var startY = Math.random() < 0.5 ? 1 : maxCellY;
+
+        var goalX = startX;
+        var goalY = startY;
+
+        while (startX == goalX && startY == goalY) {
+            var goalX = Math.random() < 0.5 ? 1 : maxCellX;
+            var goalY = Math.random() < 0.5 ? 1 : maxCellY;
+        }
+
+        maze.startPoint = {'x': startX, 'y': startY};
         maze.goalPoint = {'x': goalX, 'y': goalY};
 
     };
