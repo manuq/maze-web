@@ -155,6 +155,8 @@ define(function (require) {
             this.visitedColor = 'hsl(' + hue + ', 30%, 80%)';
             this.path = undefined;
             this.animation = undefined;
+
+            dirtyCells.push({'x': this.x, 'y': this.y});
         };
 
         Player.prototype.isMoving = function () {
