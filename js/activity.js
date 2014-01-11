@@ -13,7 +13,6 @@ define(function (require) {
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
-        var visitedColor = "#ccbbaa";
         var goalColor = "#00ffaa";
 
         var cellWidth;
@@ -88,8 +87,8 @@ define(function (require) {
         var drawMazeCell = function (x, y) {
             drawGround(x, y, maze.walls[x][y]);
 
-            if (maze.visited[x][y] == 1) {
-                drawPoint(x, y, visitedColor);
+            if (maze.visited[x][y] !== undefined) {
+                drawPoint(x, y, maze.visited[x][y]);
             }
 
             if (debug) {
@@ -115,8 +114,8 @@ define(function (require) {
             for (var x=0; x<maze.width; x++) {
                 for (var y=0; y<maze.height; y++) {
                     drawGround(x, y, maze.walls[x][y]);
-                    if (maze.visited[x][y] == 1) {
-                        drawPoint(x, y, visitedColor);
+                    if (maze.visited[x][y] !== undefined) {
+                        drawPoint(x, y, maze.visited[x][y]);
                     }
                     if (debug) {
                         if (maze.forks[x][y] == 1) {
@@ -151,7 +150,9 @@ define(function (require) {
         var Player = function () {
             this.x = 1;
             this.y = 1;
-            this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
+            var hue = Math.floor(Math.random()*360);
+            this.color = 'hsl(' + hue + ', 90%, 50%)';
+            this.visitedColor = 'hsl(' + hue + ', 30%, 80%)';
             this.path = undefined;
             this.animation = undefined;
         };
@@ -228,7 +229,7 @@ define(function (require) {
                     that.animation = undefined;
                 };
 
-                maze.visited[that.x][that.y] = 1;
+                maze.visited[that.x][that.y] = that.visitedColor;
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
