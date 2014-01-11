@@ -283,7 +283,12 @@ define(function (require) {
 
         document.addEventListener("keydown", onKeyDown);
 
-        var animate = function () {
+        var animate = function (timestamp) {
+            var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
+            var light = Math.floor(50 + (15 * (1 + Math.cos(timestamp / 300))));
+            goalColor = 'hsl(' + hue + ', 50%, ' + light + '%)';
+            dirtyCells.push({'x': maze.goal.x, 'y': maze.goal.y});
+
             dirtyCells.forEach(function (cell) {
                 drawMazeCell(cell.x, cell.y);
             });
