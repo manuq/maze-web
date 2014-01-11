@@ -10,7 +10,7 @@ define(function (require) {
     maze.goal = {};
 
     maze.walls = [];
-    maze.transversed = [];
+    maze.visited = [];
     maze.directions = [];
     maze.forks = [];
 
@@ -109,7 +109,7 @@ define(function (require) {
         initialize(aspectRatio, size);
 
         maze.walls = createMatrix(maze.width, maze.height);
-        maze.transversed = createMatrix(maze.width, maze.height);
+        maze.visited = createMatrix(maze.width, maze.height);
         maze.directions = createMatrix(maze.width, maze.height);
         maze.forks = createMatrix(maze.width, maze.height);
 

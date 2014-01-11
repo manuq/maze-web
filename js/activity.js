@@ -13,7 +13,7 @@ define(function (require) {
 
         var wallColor = "#101010";
         var corridorColor = "#ffffff";
-        var transversedColor = "#ccbbaa";
+        var visitedColor = "#ccbbaa";
         var goalColor = "#00ffaa";
 
         var cellWidth;
@@ -40,10 +40,10 @@ define(function (require) {
             var toolbarElem = document.getElementById("main-toolbar");
 
             canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight - toolbarElem.offsetHeight - 1;
+            canvasHeight = window.innerHeight - toolbarElem.offsetHeight - 3;
 
-            cellWidth = Math.ceil(canvasWidth / maze.width);
-            cellHeight = Math.ceil(canvasHeight / maze.height);
+            cellWidth = Math.floor(canvasWidth / maze.width);
+            cellHeight = Math.floor(canvasHeight / maze.height);
 
             mazeCanvas.width = canvasWidth;
             mazeCanvas.height = canvasHeight;
@@ -88,8 +88,8 @@ define(function (require) {
         var drawMazeCell = function (x, y) {
             drawGround(x, y, maze.walls[x][y]);
 
-            if (maze.transversed[x][y] == 1) {
-                drawPoint(x, y, transversedColor);
+            if (maze.visited[x][y] == 1) {
+                drawPoint(x, y, visitedColor);
             }
 
             if (debug) {
@@ -115,8 +115,8 @@ define(function (require) {
             for (var x=0; x<maze.width; x++) {
                 for (var y=0; y<maze.height; y++) {
                     drawGround(x, y, maze.walls[x][y]);
-                    if (maze.transversed[x][y] == 1) {
-                        drawPoint(x, y, transversedColor);
+                    if (maze.visited[x][y] == 1) {
+                        drawPoint(x, y, visitedColor);
                     }
                     if (debug) {
                         if (maze.forks[x][y] == 1) {
@@ -228,7 +228,7 @@ define(function (require) {
                     that.animation = undefined;
                 };
 
-                maze.transversed[that.x][that.y] = 1;
+                maze.visited[that.x][that.y] = 1;
 
                 dirtyCells.push({'x': that.x, 'y': that.y});
 
