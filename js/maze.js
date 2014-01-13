@@ -103,15 +103,24 @@ define(function (require) {
             maxCellY = maze.height-3;
         }
 
-        var startX = Math.random() < 0.5 ? 1 : maxCellX;
-        var startY = Math.random() < 0.5 ? 1 : maxCellY;
+        var startX;
+        var goalY;
+        if (Math.random() < 0.5) {
+            startX = 1;
+            goalX = maxCellX;
+        } else {
+            startX = maxCellX;
+            goalX = 1;
+        }
 
-        var goalX = startX;
-        var goalY = startY;
-
-        while (startX == goalX && startY == goalY) {
-            var goalX = Math.random() < 0.5 ? 1 : maxCellX;
-            var goalY = Math.random() < 0.5 ? 1 : maxCellY;
+        var startY;
+        var goalX;
+        if (Math.random() < 0.5) {
+            startY = 1;
+            goalY = maxCellY;
+        } else {
+            startY = maxCellY;
+            goalY = 1;
         }
 
         maze.startPoint = {'x': startX, 'y': startY};
