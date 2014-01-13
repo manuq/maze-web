@@ -35,8 +35,9 @@ define(function (require) {
 
         var gameSize = 60;
 
-        var onLevelTransition = false;
+        var levelStatus;
         var levelTransitionRadius;
+        var levelStartingValue;
 
         var debug = false; //true;
 
@@ -158,18 +159,59 @@ define(function (require) {
             ctx.fill();
         }
 
+        var drawLevelStarting = function () {
+            ctx.fillStyle = goalColor;
+            var width = cellWidth * levelStartingValue;
+            var height = cellHeight * levelStartingValue;
+            var x;
+            var y;
+            if (maze.goalPoint.x == 1) {
+                x = cellWidth;
+            }
+            else {
+                x = ((maze.goalPoint.x + 1) * cellWidth) - width;
+            }
+            if (maze.goalPoint.y == 1) {
+                y = cellHeight;
+            }
+            else {
+                y = ((maze.goalPoint.y + 1) * cellHeight) - height;
+            }
+            ctx.fillRect(x, y, width, height);
+
+            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor,
+                      0.9 * levelStartingValue);
+        }
+
+        var onLevelStart = function () {
+            levelStatus = 'starting';
+
+            tween = new TWEEN.Tween({t: 0});
+            tween.to({t: 1}, 900);
+            tween.easing(TWEEN.Easing.Quadratic.InOut);
+            tween.onUpdate(function () {
+                levelStartingValue = this.t;
+            });
+            tween.onComplete(function () {
+                levelStartingValue = undefined;
+                levelStatus = 'playing';
+                drawMaze();
+            });
+            tween.start();
+        }
+
         var runLevel = function () {
             maze.generate(window.innerWidth / window.innerHeight, gameSize);
             updateMazeSize();
             players = {};
             winner = undefined;
-            drawMaze();
+            onLevelStart();
         }
         runLevel();
 
         var onLevelComplete = function (player) {
             winner = player;
-            onLevelTransition = true;
+            levelStatus = 'transition';
 
             var audio = new Audio('sounds/win.wav');
             audio.play();
@@ -188,7 +230,6 @@ define(function (require) {
                 levelTransitionRadius = this.radius;
             });
             tween.onComplete(function () {
-                onLevelTransition = false;
                 nextLevel();
             });
             tween.start();
@@ -359,7 +400,7 @@ define(function (require) {
         };
 
         var onKeyDown = function (event) {
-            if (onLevelTransition) {
+            if (levelStatus == 'transition') {
                 return;
             }
 
@@ -410,15 +451,24 @@ define(function (require) {
         var animate = function (timestamp) {
             TWEEN.update(timestamp);
 
-            if (onLevelTransition) {
+            switch(levelStatus) {
+            case 'transition':
                 drawLevelComplete();
-            } else {
+                break;
+
+            case 'starting':
+                animateGoal(timestamp);
+                drawLevelStarting();
+                break;
+
+            case 'playing':
                 animateGoal(timestamp);
 
                 dirtyCells.forEach(function (cell) {
                     drawMazeCell(cell.x, cell.y);
                 });
                 dirtyCells = [];
+                break;
             }
 
             requestAnimationFrame(animate);
