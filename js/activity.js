@@ -25,7 +25,8 @@ define(function (require) {
         var controls = {
             'arrows': [38, 39, 40, 37],
             'wasd': [87, 68, 83, 65],
-            'ijkl': [73, 76, 75, 74]
+            'ijkl': [73, 76, 75, 74],
+            'mouse': [-1, -1, -1, -1]
         };
 
         var controlColors = {};
@@ -398,6 +399,52 @@ define(function (require) {
             this.path = this.findPath(direction);
             this.animation = setInterval(next, 40);
         };
+
+        var mazeClick = function (event) {
+            if (levelStatus == 'transition') {
+                return;
+            }
+            
+            var currentControl = 'mouse'
+            
+            if (!(currentControl in players)) {
+                players[currentControl] = new Player(currentControl);
+            }
+            
+            var player = players[currentControl];
+            
+            var px = cellWidth * (player.x + 0.5);
+            var py = cellHeight * (player.y + 0.5);
+            
+            var x = event.x;
+            var y = event.y;
+
+            var canvas = document.getElementById("maze");
+            x -= canvas.offsetLeft;
+            y -= canvas.offsetTop;
+            
+            if (Math.abs(y-py) > Math.abs(x-px)) {
+                if (y > py+15) {
+                    player.move('south');
+                }
+                if (y < px-15) {
+                    player.move('north');
+                }
+            } else {
+                if (x > px+15) {
+                    player.move('east');
+                }
+                if (y < px-15) {
+                    player.move('west');
+                }
+            }
+        }
+
+        if (mazeCanvas.addEventListener) {
+            mazeCanvas.addEventListener("mousedown", mazeClick);
+        } else {
+            mazeCanvas.attachEvent('onclick', mazeClick);
+        }  
 
         var onKeyDown = function (event) {
             if (levelStatus == 'transition') {
