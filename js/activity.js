@@ -423,22 +423,18 @@ define(function (require) {
             x -= canvas.offsetLeft;
             y -= canvas.offsetTop;
             
-            if (Math.abs(y-py) > Math.abs(x-px)) {
-                if (y > py+15) {
+            var angle = Math.atan2(y - py, x - px) * 180 / Math.PI;
+            
+            if (45 < angle && angle < 135) {
                     player.move('south');
-                }
-                if (y < px-15) {
+            } else if (-45 > angle && angle > -135) {
                     player.move('north');
-                }
-            } else {
-                if (x > px+15) {
+            } else if (-45 < angle && angle < 45) {
                     player.move('east');
-                }
-                if (y < px-15) {
+            } else {
                     player.move('west');
-                }
             }
-        }
+        };
 
         if (mazeCanvas.addEventListener) {
             mazeCanvas.addEventListener("mousedown", mazeClick);
