@@ -249,6 +249,7 @@ define(function (require) {
                 var hue = Math.floor(Math.random()*360);
                 controlColors[control] = {
                     'color': 'hsl(' + hue + ', 90%, 50%)',
+                    'blockedColor': 'hsl(' + hue + ', 90%, 80%)',
                     'visitedColor': 'hsl(' + hue + ', 30%, 80%)'
                 }
             }
@@ -325,6 +326,7 @@ define(function (require) {
 
             function restoreColor() {
                 that.color = controlColors[that.control].color;
+                dirtyCells.push({'x': that.x, 'y': that.y});
             }
 
             if (this.blockTween !== undefined) {
@@ -332,17 +334,10 @@ define(function (require) {
                 restoreColor();
             }
 
-            var hsl = getHSL(this.color);
-            var endLight = parseInt(hsl.l.substring(0, hsl.s.length-1));
-            var startLight = endLight + 30;
+            this.blockTween = new TWEEN.Tween({}).to({}, 300);
 
-            this.blockTween = new TWEEN.Tween({l: startLight});
-            this.blockTween.to({l: endLight}, 300);
-
-            this.blockTween.onUpdate(function () {
-                that.color = 'hsl(' + hsl.h + ', ' + hsl.s + ', ' + this.l + '%)';
-                dirtyCells.push({'x': that.x, 'y': that.y});
-            });
+            this.color = controlColors[this.control].blockedColor;
+            dirtyCells.push({'x': this.x, 'y': this.y});
 
             this.blockTween.onComplete(function () {
                 restoreColor();
