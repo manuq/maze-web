@@ -404,27 +404,27 @@ define(function (require) {
             if (levelStatus == 'transition') {
                 return;
             }
-            
+
             var currentControl = 'mouse'
-            
+
             if (!(currentControl in players)) {
                 players[currentControl] = new Player(currentControl);
             }
-            
+
             var player = players[currentControl];
-            
+
             var px = cellWidth * (player.x + 0.5);
             var py = cellHeight * (player.y + 0.5);
-            
+
             var x = event.x;
             var y = event.y;
 
             var canvas = document.getElementById("maze");
             x -= canvas.offsetLeft;
             y -= canvas.offsetTop;
-            
+
             var angle = Math.atan2(y - py, x - px) * 180 / Math.PI;
-            
+
             if (45 < angle && angle < 135) {
                     player.move('south');
             } else if (-45 > angle && angle > -135) {
@@ -440,7 +440,7 @@ define(function (require) {
             mazeCanvas.addEventListener("mousedown", mazeClick);
         } else {
             mazeCanvas.attachEvent('onclick', mazeClick);
-        }  
+        }
 
         var onKeyDown = function (event) {
             if (levelStatus == 'transition') {
