@@ -248,13 +248,13 @@ define(function (require) {
             if (!(control in controlColors)) {
                 var hue = Math.floor(Math.random()*360);
                 controlColors[control] = {
-                    'color': 'hsl(' + hue + ', 90%, 50%)',
-                    'blockedColor': 'hsl(' + hue + ', 90%, 80%)',
-                    'visitedColor': 'hsl(' + hue + ', 30%, 80%)'
+                    'normal': 'hsl(' + hue + ', 90%, 50%)',
+                    'blocked': 'hsl(' + hue + ', 90%, 80%)',
+                    'visited': 'hsl(' + hue + ', 30%, 80%)'
                 }
             }
-            this.color = controlColors[control].color;
-            this.visitedColor = controlColors[control].visitedColor;
+            this.color = controlColors[control].normal;
+            this.visitedColor = controlColors[control].visited;
             this.path = undefined;
             this.animation = undefined;
             this.blockTween = undefined;
@@ -325,7 +325,7 @@ define(function (require) {
             var that = this;
 
             function restoreColor() {
-                that.color = controlColors[that.control].color;
+                that.color = controlColors[that.control].normal;
                 dirtyCells.push({'x': that.x, 'y': that.y});
             }
 
@@ -336,7 +336,7 @@ define(function (require) {
 
             this.blockTween = new TWEEN.Tween({}).to({}, 300);
 
-            this.color = controlColors[this.control].blockedColor;
+            this.color = controlColors[this.control].blocked;
             dirtyCells.push({'x': this.x, 'y': this.y});
 
             this.blockTween.onComplete(function () {
