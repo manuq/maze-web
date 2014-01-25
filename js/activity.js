@@ -476,19 +476,6 @@ define(function (require) {
 
         document.addEventListener("keydown", onKeyDown);
 
-        var CSS_INTEGER = "[-\\+]?\\d+%?";
-        var CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?";
-        var CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")";
-        var MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
-        var hslMatcher = new RegExp("hsl" + MATCH3);
-
-        var getHSL = function (hslColor) {
-           var match = hslMatcher.exec(hslColor);
-            if (match) {
-                return { h: match[1], s: match[2], l: match[3] };
-            }
-        };
-
         var animateGoal = function (timestamp) {
             var hue = Math.floor(120 * (1 + Math.cos(timestamp / 3000)));
             var light = Math.floor(50 + (10 * (1 + Math.cos(timestamp / 300))));
