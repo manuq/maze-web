@@ -43,7 +43,6 @@ define(function (require) {
         var debug = false; //true;
 
         var mazeCanvas = document.getElementById("maze");
-        var ctx = mazeCanvas.getContext("2d");
 
         var updateMazeSize = function () {
             var toolbarElem = document.getElementById("main-toolbar");
@@ -64,26 +63,22 @@ define(function (require) {
         };
         window.addEventListener('resize', onWindowResize);
 
-        var drawCell = function (x, y, color) {
+        var drawCell = function (ctx, x, y, color) {
             ctx.fillStyle = color;
             ctx.fillRect(cellWidth * x, cellHeight * y, cellWidth, cellHeight);
         }
 
-        var drawGround = function (x, y, value) {
+        var drawGround = function (ctx, x, y, value) {
             var color;
             if (value == 1) {
                 color = wallColor;
             } else {
                 color = corridorColor;
             }
-            drawCell(x, y, color);
+            drawCell(ctx, x, y, color);
         };
 
-        var drawPoint = function (x, y, color, size) {
-            if (size === undefined) {
-                size = 0.5;
-            }
-
+        var drawPoint = function (ctx, x, y, color, size) {
             var centerX = cellWidth * (x + 0.5);
             var centerY = cellHeight * (y + 0.5);
             var radius = size * Math.min(cellWidth, cellHeight) / 2;
@@ -94,62 +89,74 @@ define(function (require) {
             ctx.fill();
         };
 
-        var drawMazeCell = function (x, y) {
-            drawGround(x, y, maze.walls[x][y]);
+        var drawMazeCell = function (x, y, ctx) {
+            if (ctx === undefined) {
+                ctx = mazeCanvas.getContext("2d");
+            }
+
+            drawGround(ctx, x, y, maze.walls[x][y]);
 
             if (maze.visited[x][y] !== undefined) {
-                drawPoint(x, y, maze.visited[x][y]);
+                drawPoint(ctx, x, y, maze.visited[x][y], 0.5);
             }
 
             if (debug) {
                 if (maze.forks[x][y] == 1) {
-                    drawPoint(x, y, '#faa');
+                    drawPoint(ctx, x, y, '#faa', 0.5);
                 }
             }
 
             if (x == maze.startPoint.x && y == maze.startPoint.y) {
-                drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
+                drawPoint(ctx, maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
             }
 
             if (x == maze.goalPoint.x && y == maze.goalPoint.y) {
-                drawCell(maze.goalPoint.x, maze.goalPoint.y, goalColor);
+                drawCell(ctx, maze.goalPoint.x, maze.goalPoint.y, goalColor);
             }
 
             for (control in players) {
                 var player = players[control];
                 if (x == player.x && y == player.y) {
-                    drawPoint(player.x, player.y, player.color, 0.9);
+                    drawPoint(ctx, player.x, player.y, player.color, 0.9);
                 }
             };
 
         }
 
-        var drawMaze = function () {
+        var drawMaze = function (ctx) {
+            if (ctx === undefined) {
+                ctx = mazeCanvas.getContext("2d");
+            }
+
             for (var x=0; x<maze.width; x++) {
                 for (var y=0; y<maze.height; y++) {
-                    drawGround(x, y, maze.walls[x][y]);
+                    drawGround(ctx, x, y, maze.walls[x][y]);
                     if (maze.visited[x][y] !== undefined) {
-                        drawPoint(x, y, maze.visited[x][y]);
+                        drawPoint(ctx, x, y, maze.visited[x][y], 0.5);
                     }
                     if (debug) {
                         if (maze.forks[x][y] == 1) {
-                            drawPoint(x, y, '#faa');
+                            drawPoint(ctx, x, y, '#faa', 0.5);
                         }
                     }
                 }
             }
 
-            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
-            drawCell(maze.goalPoint.x, maze.goalPoint.y, goalColor);
+            drawPoint(ctx, maze.startPoint.x, maze.startPoint.y, startColor, 0.9);
+            drawCell(ctx, maze.goalPoint.x, maze.goalPoint.y, goalColor);
 
             for (control in players) {
                 var player = players[control];
-                drawPoint(player.x, player.y, player.color, 0.9);
+                drawPoint(ctx, player.x, player.y, player.color, 0.9);
             };
 
         };
 
-        var drawLevelComplete = function () {
+        var drawLevelComplete = function (ctx) {
+            if (ctx === undefined) {
+                ctx = mazeCanvas.getContext("2d");
+            }
+
             var centerX = cellWidth * (winner.x + 0.5);
             var centerY = cellHeight * (winner.y + 0.5);
             var radius = levelTransitionRadius;
@@ -160,7 +167,11 @@ define(function (require) {
             ctx.fill();
         }
 
-        var drawLevelStarting = function () {
+        var drawLevelStarting = function (ctx) {
+            if (ctx === undefined) {
+                ctx = mazeCanvas.getContext("2d");
+            }
+
             ctx.fillStyle = goalColor;
             var width = cellWidth * levelStartingValue;
             var height = cellHeight * levelStartingValue;
@@ -180,7 +191,7 @@ define(function (require) {
             }
             ctx.fillRect(x, y, width, height);
 
-            drawPoint(maze.startPoint.x, maze.startPoint.y, startColor,
+            drawPoint(ctx, maze.startPoint.x, maze.startPoint.y, startColor,
                       0.9 * levelStartingValue);
         }
 
