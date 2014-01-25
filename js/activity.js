@@ -29,7 +29,10 @@ define(function (require) {
             'mouse': [-1, -1, -1, -1]
         };
 
+        var controlNames = ['arrows', 'wasd', 'ijkl', 'mouse'];
+
         var controlColors = {};
+        var controlSprites = {};
 
         var players = {};
         var winner;
@@ -44,6 +47,8 @@ define(function (require) {
 
         var mazeCanvas = document.getElementById("maze");
 
+        var spriteCanvas = document.createElement("canvas");
+
         var updateMazeSize = function () {
             var toolbarElem = document.getElementById("main-toolbar");
 
@@ -55,14 +60,36 @@ define(function (require) {
 
             mazeCanvas.width = canvasWidth;
             mazeCanvas.height = canvasHeight;
+
+            spriteCanvas.width = cellWidth * 2; // number of states
+            spriteCanvas.height = cellHeight * controlNames.length;
         };
 
         var onWindowResize = function () {
             updateMazeSize();
+            updateSprites();
             drawMaze();
         };
         window.addEventListener('resize', onWindowResize);
 
+        var updateSprites = function () {
+            for (control in controls) {
+                if (control in controlColors) {
+                    createPlayerSprite(control);
+                }
+            }
+        }
+
+        var createPlayerSprite = function (control) {
+            var i = controlNames.indexOf(control);
+            ctx = spriteCanvas.getContext("2d");
+            drawPoint(ctx, 0, i, controlColors[control].normal, 0.9);
+            drawPoint(ctx, 1, i, controlColors[control].blocked, 0.9);
+            return {
+                'normal': {'image': spriteCanvas, 'x': 0, 'y': i},
+                'blocked': {'image': spriteCanvas, 'x': 1, 'y': i}
+            };
+        }
         var drawCell = function (ctx, x, y, color) {
             ctx.fillStyle = color;
             ctx.fillRect(cellWidth * x, cellHeight * y, cellWidth, cellHeight);
@@ -88,6 +115,14 @@ define(function (require) {
             ctx.fillStyle = color;
             ctx.fill();
         };
+
+        var drawSprite = function (ctx, x, y, spriteData) {
+            ctx.drawImage(spriteData.image,
+                          cellWidth * spriteData.x, cellHeight * spriteData.y,
+                          cellWidth, cellHeight,
+                          cellWidth * x, cellHeight * y,
+                          cellWidth, cellHeight)
+        }
 
         var drawMazeCell = function (x, y, ctx) {
             if (ctx === undefined) {
@@ -117,7 +152,7 @@ define(function (require) {
             for (control in players) {
                 var player = players[control];
                 if (x == player.x && y == player.y) {
-                    drawPoint(ctx, player.x, player.y, player.color, 0.9);
+                    drawSprite(ctx, x, y, player.sprite);
                 }
             };
 
@@ -147,7 +182,7 @@ define(function (require) {
 
             for (control in players) {
                 var player = players[control];
-                drawPoint(ctx, player.x, player.y, player.color, 0.9);
+                drawSprite(ctx, x, y, player.sprite);
             };
 
         };
@@ -215,6 +250,7 @@ define(function (require) {
         var runLevel = function () {
             maze.generate(window.innerWidth / window.innerHeight, gameSize);
             updateMazeSize();
+            updateSprites();
             players = {};
             winner = undefined;
             onLevelStart();
@@ -262,9 +298,11 @@ define(function (require) {
                     'normal': 'hsl(' + hue + ', 90%, 50%)',
                     'blocked': 'hsl(' + hue + ', 90%, 80%)',
                     'visited': 'hsl(' + hue + ', 30%, 80%)'
-                }
+                };
+                controlSprites[control] = createPlayerSprite(control);
             }
             this.color = controlColors[control].normal;
+            this.sprite = controlSprites[control].normal;
             this.visitedColor = controlColors[control].visited;
             this.path = undefined;
             this.animation = undefined;
@@ -337,6 +375,7 @@ define(function (require) {
 
             function restoreColor() {
                 that.color = controlColors[that.control].normal;
+                that.sprite = controlSprites[that.control].normal;
                 dirtyCells.push({'x': that.x, 'y': that.y});
             }
 
@@ -348,6 +387,7 @@ define(function (require) {
             this.blockTween = new TWEEN.Tween({}).to({}, 300);
 
             this.color = controlColors[this.control].blocked;
+            this.sprite = controlSprites[this.control].blocked;
             dirtyCells.push({'x': this.x, 'y': this.y});
 
             this.blockTween.onComplete(function () {
