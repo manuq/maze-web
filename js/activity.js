@@ -83,8 +83,8 @@ define(function (require) {
         var createPlayerSprite = function (control) {
             var i = controlNames.indexOf(control);
             ctx = spriteCanvas.getContext("2d");
-            drawPoint(ctx, 0, i, controlColors[control].normal, 0.9);
-            drawPoint(ctx, 1, i, controlColors[control].blocked, 0.9);
+            drawPlayerFace(ctx, 0, i, controlColors[control].normal);
+            drawPlayerFace(ctx, 1, i, controlColors[control].blocked);
             return {
                 'normal': {'image': spriteCanvas, 'x': 0, 'y': i},
                 'blocked': {'image': spriteCanvas, 'x': 1, 'y': i}
@@ -115,6 +115,41 @@ define(function (require) {
             ctx.fillStyle = color;
             ctx.fill();
         };
+
+        var drawPlayerFace = function (ctx, x, y, color) {
+            drawPoint(ctx, x, y, color, 0.9);
+
+            var eye1X = cellWidth * (x + 0.3);
+            var eye1Y = cellHeight * (y + 0.45);
+            var eyeRadius = 0.28 * Math.min(cellWidth, cellHeight) / 2;
+            ctx.beginPath();
+            ctx.arc(eye1X, eye1Y, eyeRadius, 0, 2 * Math.PI, false);
+
+            var eye2X = cellWidth * (x + 0.7);
+            var eye2Y = cellHeight * (y + 0.45);
+            ctx.arc(eye2X, eye2Y, eyeRadius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(eye1X, eye1Y, eyeRadius / 2, 0, 2 * Math.PI, false);
+            ctx.arc(eye2X, eye2Y, eyeRadius / 2, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "#000000";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(cellWidth * (x + 0.25), cellHeight * (y + 0.65));
+            ctx.quadraticCurveTo(cellWidth * (x + 0.5), cellHeight * (y + 0.75),
+                                 cellWidth * (x + 0.75), cellHeight * (y + 0.65));
+            ctx.quadraticCurveTo(cellWidth * (x + 0.5), cellHeight * (y + 0.75),
+                                 cellWidth * (x + 0.75), cellHeight * (y + 0.65));
+            ctx.quadraticCurveTo(cellWidth * (x + 0.5), cellHeight * (y + 1),
+                                 cellWidth * (x + 0.25), cellHeight * (y + 0.65));
+            ctx.quadraticCurveTo(cellWidth * (x + 0.5), cellHeight * (y + 1),
+                                 cellWidth * (x + 0.25), cellHeight * (y + 0.65));
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        }
 
         var drawSprite = function (ctx, x, y, spriteData) {
             ctx.drawImage(spriteData.image,
