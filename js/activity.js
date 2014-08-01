@@ -497,8 +497,8 @@ define(function (require) {
             var px = cellWidth * (player.x + 0.5);
             var py = cellHeight * (player.y + 0.5);
 
-            var x = event.x;
-            var y = event.y;
+            var x = event.clientX;
+            var y = event.clientY;
 
             var canvas = document.getElementById("maze");
             x -= canvas.offsetLeft;
