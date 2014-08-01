@@ -296,7 +296,7 @@ define(function (require) {
             winner = player;
             levelStatus = 'transition';
 
-            var audio = new Audio('sounds/win.wav');
+            var audio = new Audio('sounds/win.ogg');
             audio.play();
 
             for (control in players) {
@@ -431,7 +431,7 @@ define(function (require) {
 
             this.blockTween.start();
 
-            var audio = new Audio('sounds/tick.wav');
+            var audio = new Audio('sounds/tick.ogg');
             audio.play();
         }
 
