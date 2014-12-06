@@ -4,3 +4,5 @@ activity_version = 2
 bundle_id = org.sugarlabs.MazeWebActivity
 exec = sugar-activity-web
 icon = activity-icon
+categories = game
+summary = A smiple maze game that you can play head to head with friends!
